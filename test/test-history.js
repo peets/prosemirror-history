@@ -396,4 +396,17 @@ describe("history", () => {
     state = state.apply(rebase)
     state = command(state, undo)
   })
+
+  it("combines automatic transactions into the previous event", () => {
+    let state = mkState()
+    state = type(state, "b")
+    state = type(state, "c")
+    state = state.apply(state.tr.insertText("a", 1))
+    state = state.apply(state.tr.insertText("d", 4).setMeta("automatic", true));
+    ist(state.doc, doc(p("abcd")), eq)
+    state = command(state, undo)
+    ist(state.doc, doc(p("bc")), eq)
+    state = command(state, redo)
+    ist(state.doc, doc(p("abcd")), eq)
+  });
 })
